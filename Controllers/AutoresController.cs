@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using webAPIAutores.Entidades;
+using webAPIAutores.Servicios;
 
 namespace webAPIAutores.Controllers;
 
@@ -9,10 +10,40 @@ namespace webAPIAutores.Controllers;
 public class AutoresController : ControllerBase
 {
     private readonly ApplicationDbContext context;
+    private readonly IServicio servicio;
+    private readonly ServicioTransient servicioTransient;
+    private readonly ServicioScoped servicioScoped;
+    private readonly ServicioSingleton servicioSingleton;
+    private readonly ILogger<AutoresController> logger;
 
-    public AutoresController(ApplicationDbContext _context)
+    public AutoresController(
+        ApplicationDbContext _context, 
+        IServicio _servicio,
+        ServicioTransient _servicioTransient,
+        ServicioScoped _servicioScoped,
+        ServicioSingleton _servicioSingleton,
+        ILogger<AutoresController> _logger
+        )
     {
         context = _context;
+        servicio = _servicio;
+        servicioTransient = _servicioTransient;
+        servicioScoped = _servicioScoped;
+        servicioSingleton = _servicioSingleton;
+        logger = _logger;
+    }
+
+    [HttpGet("GUID")]
+    public ActionResult ObtenerGuids()
+    {
+        return Ok(new {
+            AutoresControllerTransient = servicioTransient.Guid,
+            ServicioA_Transient = servicio.ObtenerTransient(),
+            AutoresControllerScoped = servicioScoped.Guid,
+            ServicioA_Scoped = servicio.ObtenerScoped(),
+            AutoresControllerSingleton = servicioSingleton.Guid,
+            ServicioA_Singleton = servicio.ObtenerSingleton()
+        });
     }
 
     [HttpGet]               //   /api/autores
@@ -20,6 +51,8 @@ public class AutoresController : ControllerBase
     [HttpGet("/listado")]   //   /listado
     public async Task<ActionResult<List<Autor>>> Get()
     {
+        logger.LogInformation("Obteniendo los autores");
+        logger.LogWarning("Prueba warning");
         return await context.Autores.Include(x => x.Libros).ToListAsync();
     }
 
