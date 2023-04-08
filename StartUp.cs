@@ -1,5 +1,8 @@
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using webAPIAutores.Filtros;
+using webAPIAutores.Middlewares;
 using webAPIAutores.Servicios;
 
 namespace webAPIAutores;
@@ -14,9 +17,11 @@ public class StartUp
     {
         services.AddTransient<IServicio, ServicioA>();
 
-        services.AddControllers().AddJsonOptions(x =>
-            x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles
-        );
+        services
+            .AddControllers(
+                opciones => opciones.Filters.Add(typeof(FiltroDeException)))
+            .AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
         services.AddDbContext<ApplicationDbContext>(options =>
             options.UseSqlServer(Configuration.GetConnectionString("defaultConnection"))
@@ -27,14 +32,21 @@ public class StartUp
         services.AddTransient<ServicioTransient>();
         services.AddScoped<ServicioScoped>();
         services.AddSingleton<ServicioSingleton>();
+        services.AddTransient<MiFiltroDeAccion>();
+        services.AddHostedService<EscribirEnArchivo>();
+
+        services.AddResponseCaching();
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
     }
 
-    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<StartUp> logger)
     {
+        app.UseLoguearRespuestaHTTP();
+
         if (env.IsDevelopment())
         {
             app.UseSwagger();
@@ -43,6 +55,7 @@ public class StartUp
 
         app.UseHttpsRedirection();
         app.UseRouting();
+        app.UseResponseCaching();
         app.UseAuthorization();
         app.UseEndpoints(endpoints =>
             endpoints.MapControllers()
