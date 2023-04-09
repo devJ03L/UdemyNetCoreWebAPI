@@ -26,7 +26,7 @@ public class StartUp
         );
 
         services.AddTransient<MiFiltroDeAccion>();
-        services.AddHostedService<EscribirEnArchivo>();
+        //services.AddHostedService<EscribirEnArchivo>();
 
         services.AddResponseCaching();
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
