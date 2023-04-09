@@ -14,9 +14,7 @@ public class StartUp
 
 
     public void ConfigureServices(IServiceCollection services)
-    {
-        services.AddTransient<IServicio, ServicioA>();
-
+    {        
         services
             .AddControllers(
                 opciones => opciones.Filters.Add(typeof(FiltroDeException)))
@@ -27,11 +25,6 @@ public class StartUp
             options.UseSqlServer(Configuration.GetConnectionString("defaultConnection"))
         );
 
-        services.AddTransient<IServicio, ServicioA>();
-
-        services.AddTransient<ServicioTransient>();
-        services.AddScoped<ServicioScoped>();
-        services.AddSingleton<ServicioSingleton>();
         services.AddTransient<MiFiltroDeAccion>();
         services.AddHostedService<EscribirEnArchivo>();
 
