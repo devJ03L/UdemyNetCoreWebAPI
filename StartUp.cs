@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using webAPIAutores.Filtros;
 using webAPIAutores.Middlewares;
-using webAPIAutores.Servicios;
 
 namespace webAPIAutores;
 
@@ -25,7 +24,7 @@ public class StartUp
             options.UseSqlServer(Configuration.GetConnectionString("defaultConnection"))
         );
 
-        services.AddTransient<MiFiltroDeAccion>();
+        //services.AddTransient<MiFiltroDeAccion>();
         //services.AddHostedService<EscribirEnArchivo>();
 
         services.AddResponseCaching();
@@ -34,11 +33,13 @@ public class StartUp
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
         services.AddSwaggerGen();
+
+        services.AddAutoMapper(typeof(StartUp));
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<StartUp> logger)
     {
-        app.UseLoguearRespuestaHTTP();
+        //app.UseLoguearRespuestaHTTP();
 
         if (env.IsDevelopment())
         {
