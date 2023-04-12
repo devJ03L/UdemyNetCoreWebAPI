@@ -34,7 +34,12 @@ public class AutoresController : ControllerBase
     [HttpGet("{id:int}")]
     public async Task<ActionResult<AutorDTO>> Get(int id)
     {
-        var autor = await context.Autores.FirstOrDefaultAsync(x => x.Id == id);
+        var autor = 
+            await context.Autores
+            .Include(autorDB => autorDB.AutoresLibros)
+            .ThenInclude(autorLibro => autorLibro.Libro)
+            .FirstOrDefaultAsync(x => x.Id == id);
+            
         if (autor == null)
             return NotFound();
 
