@@ -3,8 +3,7 @@ using webAPIAutores.Validaciones;
 
 namespace webAPIAutores.DTOs;
 
-public class LibroDTO
-{
-    public int Id { get; set; }
-    public string Titulo { get; set; }    
+public class AutorConLibrosDTO : AutorDTO
+{ 
+    public List<LibroDTO> Libros { get; set; }
 }

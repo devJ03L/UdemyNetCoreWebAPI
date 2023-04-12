@@ -10,7 +10,9 @@ public class AutoMapperProfiles : Profile
     {
         CreateMap<AutorCreacionDTO, Autor>();
 
-        CreateMap<Autor, AutorDTO>()
+        CreateMap<Autor, AutorDTO>();
+
+        CreateMap<Autor, AutorConLibrosDTO>()
             .ForMember(
                 autor => autor.Libros,
                 opciones => opciones.MapFrom(MapLibros)
@@ -22,7 +24,9 @@ public class AutoMapperProfiles : Profile
                 opciones => opciones.MapFrom(MapAutoresLibros)
             );
 
-        CreateMap<Libro, LibroDTO>()
+        CreateMap<Libro, LibroDTO>();
+
+        CreateMap<Libro, LibroConAutoresDTO>()
             .ForMember(
                 libro => libro.Autores,
                 opciones => opciones.MapFrom(MapAutores)
@@ -44,7 +48,7 @@ public class AutoMapperProfiles : Profile
         return resultado;
     }
 
-    private List<AutorDTO> MapAutores(Libro libro, LibroDTO libroDTO)
+    private List<AutorDTO> MapAutores(Libro libro, LibroConAutoresDTO libroDTO)
     {
         var resultado = new List<AutorDTO>();
 
@@ -57,7 +61,7 @@ public class AutoMapperProfiles : Profile
         return resultado;
     }
 
-    private List<LibroDTO> MapLibros(Autor autor, AutorDTO autorDTO)
+    private List<LibroDTO> MapLibros(Autor autor, AutorConLibrosDTO autorConLibrosDTO)
     {
         var resultado = new List<LibroDTO>();
 
