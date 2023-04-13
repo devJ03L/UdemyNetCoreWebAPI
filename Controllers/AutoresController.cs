@@ -67,15 +67,19 @@ public class AutoresController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public async Task<ActionResult> Put(Autor autor, int id)
+    public async Task<ActionResult> Put(AutorCreacionDTO autorCreacion, int id)
     {
-        if (autor.Id != id)
-            return BadRequest("Ël id del autor no coincide con el id de la URL");
+        var existe = await context.Autores.AnyAsync(aut => aut.Id == id);
+        if (!existe)
+            return NotFound();
+
+        var autor = mapper.Map<Autor>(autorCreacion);
+        autor.Id = id;
 
         context.Update(autor);
         await context.SaveChangesAsync();
 
-        return Ok();
+        return NoContent();
     }
 
     [HttpDelete("{id:int}")]
