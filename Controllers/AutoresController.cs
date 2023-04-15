@@ -12,13 +12,22 @@ public class AutoresController : ControllerBase
 {
     private readonly ApplicationDbContext context;
     private readonly IMapper mapper;
+    private readonly IConfiguration configuration;
 
     public AutoresController(
         ApplicationDbContext _context,
-        IMapper _mapper)
+        IMapper _mapper,
+        IConfiguration _configuration)
     {
         context = _context;
         mapper = _mapper;
+        configuration = _configuration;
+    }
+
+    [HttpGet("configuraciones")]
+    public ActionResult<String> GetConfig()
+    {
+        return configuration["apellido"];
     }
 
     [HttpGet]   //   /api/autores    
