@@ -1,8 +1,11 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.IdentityModel.Tokens;
 using webAPIAutores.DTOs;
 
@@ -48,6 +51,18 @@ public class CuentasController : ControllerBase
         var resultado = await signInManager.PasswordSignInAsync(credencialesUsuario.Email, credencialesUsuario.Password, isPersistent: false, lockoutOnFailure: false);
         if (!resultado.Succeeded)
             return BadRequest("Login incorrecto");
+        return ConstruirToken(credencialesUsuario);
+    }
+
+    [HttpGet("RenovarToken")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+    public ActionResult<RespuestaAutenticacion> Renovar()
+    {
+        var email = HttpContext.User.Claims.Where(claim => claim.Type == "email").FirstOrDefault().Value;
+        var credencialesUsuario = new CredencialesUsuario()
+        {
+            Email = email
+        };
         return ConstruirToken(credencialesUsuario);
     }
 

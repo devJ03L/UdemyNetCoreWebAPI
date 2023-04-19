@@ -1,9 +1,11 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using webAPIAutores.Filtros;
 using webAPIAutores.Middlewares;
 
@@ -12,7 +14,11 @@ namespace webAPIAutores;
 public class StartUp
 {
     public IConfiguration Configuration { get; }
-    public StartUp(IConfiguration configuration) => Configuration = configuration;
+    public StartUp(IConfiguration configuration)
+    {
+        JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+        Configuration = configuration;
+    }
 
 
     public void ConfigureServices(IServiceCollection services)
@@ -35,19 +41,47 @@ public class StartUp
         services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(
-                opciones => opciones.TokenValidationParameters = new TokenValidationParameters{
-                    ValidateIssuer = false, 
+                opciones => opciones.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = false,
                     ValidateAudience = false,
                     ValidateLifetime = false,
                     ValidateIssuerSigningKey = true,
                     IssuerSigningKey = new SymmetricSecurityKey(
                         Encoding.UTF8.GetBytes(Configuration["llavejwt"])),
                     ClockSkew = TimeSpan.Zero
-                    });
+                });
 
         // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
         services.AddEndpointsApiExplorer();
-        services.AddSwaggerGen();
+        services.AddSwaggerGen(
+            c =>
+            {
+                c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+                {
+                    Name = "Authorization",
+                    Type = SecuritySchemeType.ApiKey,
+                    Scheme = "Bearer",
+                    BearerFormat = "JWT",
+                    In = ParameterLocation.Header
+                });
+
+                c.AddSecurityRequirement(new OpenApiSecurityRequirement
+                {
+                    {
+                        new OpenApiSecurityScheme
+                        {
+                            Reference = new OpenApiReference
+                            {
+                                Type = ReferenceType.SecurityScheme,
+                                Id = "Bearer"
+                            }
+                        },
+                        new string[]{}
+                    }                
+                });
+            }
+        );
 
         services.AddAutoMapper(typeof(StartUp));
 
