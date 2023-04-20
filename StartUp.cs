@@ -78,17 +78,25 @@ public class StartUp
                             }
                         },
                         new string[]{}
-                    }                
+                    }
                 });
             }
         );
 
         services.AddAutoMapper(typeof(StartUp));
 
-        services
-            .AddIdentity<IdentityUser, IdentityRole>()
+        services.AddIdentity<IdentityUser, IdentityRole>()
             .AddEntityFrameworkStores<ApplicationDbContext>()
             .AddDefaultTokenProviders();
+
+        services.AddAuthorization(opciones =>
+            opciones.AddPolicy("EsAdmin", politica => politica.RequireClaim("esAdmin")));
+
+        services.AddCors(opciones => {
+            opciones.AddDefaultPolicy(builder=>{
+                builder.WithOrigins("https://apirequest.io").AllowAnyMethod().AllowAnyHeader();
+            });
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<StartUp> logger)
@@ -103,6 +111,7 @@ public class StartUp
 
         app.UseHttpsRedirection();
         app.UseRouting();
+        app.UseCors();
         app.UseResponseCaching();
         app.UseAuthorization();
         app.UseEndpoints(endpoints =>

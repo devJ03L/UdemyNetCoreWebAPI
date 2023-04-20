@@ -42,7 +42,7 @@ public class CuentasController : ControllerBase
         var resultado = await userManager.CreateAsync(usuario, credencialesUsuario.Password);
         if (!resultado.Succeeded)
             return BadRequest(resultado.Errors);
-        return ConstruirToken(credencialesUsuario);
+        return await ConstruirToken(credencialesUsuario);
     }
 
     [HttpPost("login")]
@@ -51,28 +51,49 @@ public class CuentasController : ControllerBase
         var resultado = await signInManager.PasswordSignInAsync(credencialesUsuario.Email, credencialesUsuario.Password, isPersistent: false, lockoutOnFailure: false);
         if (!resultado.Succeeded)
             return BadRequest("Login incorrecto");
-        return ConstruirToken(credencialesUsuario);
+        return await ConstruirToken(credencialesUsuario);
     }
 
     [HttpGet("RenovarToken")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
-    public ActionResult<RespuestaAutenticacion> Renovar()
+    public async Task<ActionResult<RespuestaAutenticacion>> Renovar()
     {
         var email = HttpContext.User.Claims.Where(claim => claim.Type == "email").FirstOrDefault().Value;
         var credencialesUsuario = new CredencialesUsuario()
         {
             Email = email
         };
-        return ConstruirToken(credencialesUsuario);
+        return await ConstruirToken(credencialesUsuario);
     }
 
-    private RespuestaAutenticacion ConstruirToken(CredencialesUsuario credencialesUsuario)
+    [HttpPost("HacerAdmin")]
+    public async Task<ActionResult> HacerAdmin(EditarAdminDTO editarAdminDTO)
+    {
+        var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
+        await userManager.AddClaimAsync(usuario, new Claim("esAdmin", "1"));
+        return NoContent();
+    }
+
+    [HttpPost("RemoverAdmin")]
+    public async Task<ActionResult> RemoverAdmin(EditarAdminDTO editarAdminDTO)
+    {
+        var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
+        await userManager.RemoveClaimAsync(usuario, new Claim("esAdmin", "1"));
+        return NoContent();
+    }
+
+    private async Task<RespuestaAutenticacion> ConstruirToken(CredencialesUsuario credencialesUsuario)
     {
         var claims = new List<Claim>()
         {
             new Claim("email", credencialesUsuario.Email),
             new Claim("lo que yo quiera", "cualquier valor")
         };
+
+        var usuario = await userManager.FindByEmailAsync(credencialesUsuario.Email);
+        var claimsDB = await userManager.GetClaimsAsync(usuario);
+        claims.AddRange(claimsDB);
+
 
         var llave = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["llavejwt"]));
         var creds = new SigningCredentials(llave, SecurityAlgorithms.HmacSha256);
