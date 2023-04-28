@@ -30,7 +30,7 @@ public class CuentasController : ControllerBase
         signInManager = _signInManager;
     }
 
-    [HttpPost("registrar")]
+    [HttpPost("registrar", Name = "registrarUsuario")]
     public async Task<ActionResult<RespuestaAutenticacion>> Registrar(CredencialesUsuario credencialesUsuario)
     {
         var usuario = new IdentityUser
@@ -45,7 +45,7 @@ public class CuentasController : ControllerBase
         return await ConstruirToken(credencialesUsuario);
     }
 
-    [HttpPost("login")]
+    [HttpPost("login", Name = "loginUsuario")]
     public async Task<ActionResult<RespuestaAutenticacion>> Login(CredencialesUsuario credencialesUsuario)
     {
         var resultado = await signInManager.PasswordSignInAsync(credencialesUsuario.Email, credencialesUsuario.Password, isPersistent: false, lockoutOnFailure: false);
@@ -54,7 +54,7 @@ public class CuentasController : ControllerBase
         return await ConstruirToken(credencialesUsuario);
     }
 
-    [HttpGet("RenovarToken")]
+    [HttpGet("RenovarToken", Name = "renovarToken")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<ActionResult<RespuestaAutenticacion>> Renovar()
     {
@@ -66,7 +66,7 @@ public class CuentasController : ControllerBase
         return await ConstruirToken(credencialesUsuario);
     }
 
-    [HttpPost("HacerAdmin")]
+    [HttpPost("HacerAdmin", Name = "hacerAdmin")]
     public async Task<ActionResult> HacerAdmin(EditarAdminDTO editarAdminDTO)
     {
         var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);
@@ -74,7 +74,7 @@ public class CuentasController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("RemoverAdmin")]
+    [HttpPost("RemoverAdmin", Name = "removerAdmin")]
     public async Task<ActionResult> RemoverAdmin(EditarAdminDTO editarAdminDTO)
     {
         var usuario = await userManager.FindByEmailAsync(editarAdminDTO.Email);

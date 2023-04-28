@@ -27,7 +27,7 @@ public class ComentariosController : ControllerBase
         userManager = _userManager;
     }
 
-    [HttpGet]
+    [HttpGet(Name = "obtenerComentariosLibro")]
     public async Task<ActionResult<List<ComentarioDTO>>> Get(int libroId)
     {
         var existeLibro = await context.Libros.AnyAsync(libroDB => libroDB.Id == libroId);
@@ -44,15 +44,15 @@ public class ComentariosController : ControllerBase
         var existComentario = await context.Comentarios.AnyAsync(comentario => comentario.Id == id);
         if (!existComentario)
             return NotFound();
-            
+
         var comentario = await context.Comentarios.FirstOrDefaultAsync(coment => coment.Id == id);
         return mapper.Map<ComentarioDTO>(comentario);
     }
 
-    [HttpPost]
+    [HttpPost(Name = "crearComentario")]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public async Task<ActionResult> Post(int libroId, ComentarioCreacionDTO comentarioCreacionDTO)
-    {        
+    {
         var existeLibro = await context.Libros.AnyAsync(libroDB => libroDB.Id == libroId);
         if (!existeLibro)
             return NotFound();
@@ -67,11 +67,11 @@ public class ComentariosController : ControllerBase
         await context.SaveChangesAsync();
 
         var comentarioDTO = mapper.Map<ComentarioDTO>(comentario);
-        return CreatedAtRoute("obtenerComentario", new{id = comentario.Id, libroId = libroId}, comentarioDTO);
+        return CreatedAtRoute("obtenerComentario", new { id = comentario.Id, libroId = libroId }, comentarioDTO);
     }
 
-    
-    [HttpPut("{id:int}")]
+
+    [HttpPut("{id:int}", Name = "actualizarComentario")]
     public async Task<ActionResult> Put(ComentarioCreacionDTO comentarioCreacion, int id, int libroId)
     {
         var existLibro = await context.Libros.AnyAsync(libro => libro.Id == libroId);
